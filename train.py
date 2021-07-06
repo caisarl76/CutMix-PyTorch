@@ -51,6 +51,7 @@ parser.add_argument('--depth', default=32, type=int,
                     help='depth of the network (default: 32)')
 parser.add_argument('--no-bottleneck', dest='bottleneck', action='store_false',
                     help='to use basicblock for CIFAR datasets (default: bottleneck)')
+parser.add_argument('--data_root', default='./data', type=str,)
 parser.add_argument('--dataset', dest='dataset', default='imagenet', type=str,
                     help='dataset (options: cifar10, cifar100, cifar100_lt, and imagenet)')
 parser.add_argument('--imb_type', default="exp", type=str, help='imbalance type')
@@ -95,38 +96,38 @@ def main():
 
         if args.dataset == 'cifar100':
             train_loader = torch.utils.data.DataLoader(
-                datasets.CIFAR100('../data', train=True, download=True, transform=transform_train),
+                datasets.CIFAR100(args.data_root, train=True, download=True, transform=transform_train),
                 batch_size=args.batch_size, shuffle=True, num_workers=args.workers, pin_memory=True)
             val_loader = torch.utils.data.DataLoader(
-                datasets.CIFAR100('../data', train=False, transform=transform_test),
+                datasets.CIFAR100(args.data_root, train=False, transform=transform_test),
                 batch_size=args.batch_size, shuffle=True, num_workers=args.workers, pin_memory=True)
             numberofclass = 100
         elif args.dataset == 'cifar100_lt':
 
-            train_dataset = IMBALANCECIFAR100(phase='train', imbalance_ratio=args.imb_factor, root='../data',
+            train_dataset = IMBALANCECIFAR100(phase='train', imbalance_ratio=args.imb_factor, root=args.data_root,
                                               imb_type=args.imb_type)
 
             train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True,
                                                        num_workers=args.workers, pin_memory=True)
             val_loader = torch.utils.data.DataLoader(
-                datasets.CIFAR100('../data', train=False, transform=transform_test),
+                datasets.CIFAR100(args.data_root, train=False, transform=transform_test),
                 batch_size=args.batch_size, shuffle=True, num_workers=args.workers, pin_memory=True)
             numberofclass = 100
         elif args.dataset == 'cifar10':
             train_loader = torch.utils.data.DataLoader(
-                datasets.CIFAR10('../data', train=True, download=True, transform=transform_train),
+                datasets.CIFAR10(args.data_root, train=True, download=True, transform=transform_train),
                 batch_size=args.batch_size, shuffle=True, num_workers=args.workers, pin_memory=True)
             val_loader = torch.utils.data.DataLoader(
-                datasets.CIFAR10('../data', train=False, transform=transform_test),
+                datasets.CIFAR10(args.data_root, train=False, transform=transform_test),
                 batch_size=args.batch_size, shuffle=True, num_workers=args.workers, pin_memory=True)
             numberofclass = 10
         elif args.dataset == 'cifar10_lt':
-            train_dataset = IMBALANCECIFAR10(phase='train', imbalance_ratio=args.imb_factor, root='../data',
+            train_dataset = IMBALANCECIFAR10(phase='train', imbalance_ratio=args.imb_factor, root=args.data_root,
                                               imb_type=args.imb_type)
             train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True,
                                                        num_workers=args.workers, pin_memory=True)
             val_loader = torch.utils.data.DataLoader(
-                datasets.CIFAR10('../data', train=False, transform=transform_test),
+                datasets.CIFAR10(args.data_root, train=False, transform=transform_test),
                 batch_size=args.batch_size, shuffle=True, num_workers=args.workers, pin_memory=True)
             numberofclass = 10
         else:
