@@ -107,7 +107,8 @@ class IMBALANCECIFAR10(torchvision.datasets.CIFAR10):
         if self.target_transform is not None:
             label = self.target_transform(label)
 
-        return img, label, index
+        # return img, label, index
+        return img, label
 
     def __len__(self):
         return len(self.labels)
