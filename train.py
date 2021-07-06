@@ -331,6 +331,7 @@ def validate(val_loader, model, criterion, epoch):
 
     end = time.time()
     for i, (input, target) in enumerate(val_loader):
+        input = input.cuda()
         target = target.cuda()
 
         output = model(input)
