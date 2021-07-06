@@ -1,5 +1,7 @@
 __pycache__/
 .idea/
 runs/
+data/
+
 train_nsml.py
 requirements.txt

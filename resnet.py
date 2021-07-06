@@ -3,6 +3,7 @@
 import torch.nn as nn
 import math
 
+
 def conv3x3(in_planes, out_planes, stride=1):
     "3x3 convolution with padding"
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
@@ -80,9 +81,10 @@ class Bottleneck(nn.Module):
 
         return out
 
+
 class ResNet(nn.Module):
     def __init__(self, dataset, depth, num_classes, bottleneck=False):
-        super(ResNet, self).__init__()        
+        super(ResNet, self).__init__()
         self.dataset = dataset
         if self.dataset.startswith('cifar'):
             self.inplanes = 16
@@ -99,13 +101,14 @@ class ResNet(nn.Module):
             self.relu = nn.ReLU(inplace=True)
             self.layer1 = self._make_layer(block, 16, n)
             self.layer2 = self._make_layer(block, 32, n, stride=2)
-            self.layer3 = self._make_layer(block, 64, n, stride=2) 
+            self.layer3 = self._make_layer(block, 64, n, stride=2)
             self.avgpool = nn.AvgPool2d(8)
             self.fc = nn.Linear(64 * block.expansion, num_classes)
 
         elif dataset == 'imagenet':
-            blocks ={18: BasicBlock, 34: BasicBlock, 50: Bottleneck, 101: Bottleneck, 152: Bottleneck, 200: Bottleneck}
-            layers ={18: [2, 2, 2, 2], 34: [3, 4, 6, 3], 50: [3, 4, 6, 3], 101: [3, 4, 23, 3], 152: [3, 8, 36, 3], 200: [3, 24, 36, 3]}
+            blocks = {18: BasicBlock, 34: BasicBlock, 50: Bottleneck, 101: Bottleneck, 152: Bottleneck, 200: Bottleneck}
+            layers = {18: [2, 2, 2, 2], 34: [3, 4, 6, 3], 50: [3, 4, 6, 3], 101: [3, 4, 23, 3], 152: [3, 8, 36, 3],
+                      200: [3, 24, 36, 3]}
             assert layers[depth], 'invalid detph for ResNet (depth should be one of 18, 34, 50, 101, 152, and 200)'
 
             self.inplanes = 64
@@ -117,7 +120,7 @@ class ResNet(nn.Module):
             self.layer2 = self._make_layer(blocks[depth], 128, layers[depth][1], stride=2)
             self.layer3 = self._make_layer(blocks[depth], 256, layers[depth][2], stride=2)
             self.layer4 = self._make_layer(blocks[depth], 512, layers[depth][3], stride=2)
-            self.avgpool = nn.AvgPool2d(7) 
+            self.avgpool = nn.AvgPool2d(7)
             self.fc = nn.Linear(512 * blocks[depth].expansion, num_classes)
 
         for m in self.modules():
@@ -146,11 +149,11 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        if self.dataset == 'cifar10' or self.dataset == 'cifar100':
+        if self.dataset == 'cifar10' or self.dataset == 'cifar100' or self.dataset == 'cifar100-lt' or self.dataset == 'cifar10-lt':
             x = self.conv1(x)
             x = self.bn1(x)
             x = self.relu(x)
-            
+
             x = self.layer1(x)
             x = self.layer2(x)
             x = self.layer3(x)
@@ -173,5 +176,5 @@ class ResNet(nn.Module):
             x = self.avgpool(x)
             x = x.view(x.size(0), -1)
             x = self.fc(x)
-    
+
         return x

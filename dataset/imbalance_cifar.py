@@ -150,3 +150,28 @@ class IMBALANCECIFAR100(IMBALANCECIFAR10):
         'key': 'fine_label_names',
         'md5': '7973b15100ade9c7d40fb424638fde48',
     }
+
+
+if __name__=="__main__":
+    import torch
+    import torchvision.datasets as datasets
+    normalize = transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
+                                     std=[x / 255.0 for x in [63.0, 62.1, 66.7]])
+    transform_train = transforms.Compose([
+        transforms.RandomCrop(32, padding=4),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        normalize,
+    ])
+
+    transform_test = transforms.Compose([
+        transforms.ToTensor(),
+        normalize
+    ])
+    # train = IMBALANCECIFAR100(phase='train', imbalance_ratio=0.1, root='./data', imb_type='exp')
+    train = datasets.CIFAR100('./data', train=True, download=True, transform=transform_train)
+    train_loader = torch.utils.data.DataLoader(train, batch_size=100, shuffle=True,
+                                               num_workers=0, pin_memory=True)
+    for i, (input, target) in enumerate(train_loader):
+        print(i, input.shape, target)
+        break

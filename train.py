@@ -95,38 +95,38 @@ def main():
 
         if args.dataset == 'cifar100':
             train_loader = torch.utils.data.DataLoader(
-                datasets.CIFAR100('./data', train=True, download=True, transform=transform_train),
+                datasets.CIFAR100('../data', train=True, download=True, transform=transform_train),
                 batch_size=args.batch_size, shuffle=True, num_workers=args.workers, pin_memory=True)
             val_loader = torch.utils.data.DataLoader(
-                datasets.CIFAR100('./data', train=False, transform=transform_test),
+                datasets.CIFAR100('../data', train=False, transform=transform_test),
                 batch_size=args.batch_size, shuffle=True, num_workers=args.workers, pin_memory=True)
             numberofclass = 100
         elif args.dataset == 'cifar100_lt':
 
-            train_dataset = IMBALANCECIFAR100(phase='train', imbalance_ratio=args.imb_factor, root='./data',
+            train_dataset = IMBALANCECIFAR100(phase='train', imbalance_ratio=args.imb_factor, root='../data',
                                               imb_type=args.imb_type)
 
             train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True,
                                                        num_workers=args.workers, pin_memory=True)
             val_loader = torch.utils.data.DataLoader(
-                datasets.CIFAR100('./data', train=False, transform=transform_test),
+                datasets.CIFAR100('../data', train=False, transform=transform_test),
                 batch_size=args.batch_size, shuffle=True, num_workers=args.workers, pin_memory=True)
             numberofclass = 100
         elif args.dataset == 'cifar10':
             train_loader = torch.utils.data.DataLoader(
-                datasets.CIFAR10('./data', train=True, download=True, transform=transform_train),
+                datasets.CIFAR10('../data', train=True, download=True, transform=transform_train),
                 batch_size=args.batch_size, shuffle=True, num_workers=args.workers, pin_memory=True)
             val_loader = torch.utils.data.DataLoader(
                 datasets.CIFAR10('../data', train=False, transform=transform_test),
                 batch_size=args.batch_size, shuffle=True, num_workers=args.workers, pin_memory=True)
             numberofclass = 10
         elif args.dataset == 'cifar10_lt':
-            train_dataset = IMBALANCECIFAR10(phase='train', imbalance_ratio=args.imb_factor, root='./data',
+            train_dataset = IMBALANCECIFAR10(phase='train', imbalance_ratio=args.imb_factor, root='../data',
                                               imb_type=args.imb_type)
             train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True,
                                                        num_workers=args.workers, pin_memory=True)
             val_loader = torch.utils.data.DataLoader(
-                datasets.CIFAR10('./data', train=False, transform=transform_test),
+                datasets.CIFAR10('../data', train=False, transform=transform_test),
                 batch_size=args.batch_size, shuffle=True, num_workers=args.workers, pin_memory=True)
             numberofclass = 10
         else:
@@ -186,8 +186,8 @@ def main():
     else:
         raise Exception('unknown network architecture: {}'.format(args.net_type))
 
-    model = torch.nn.DataParallel(model).cuda()
-
+    # model = torch.nn.DataParallel(model).cuda()
+    model = model.cuda()
     print(model)
     print('the number of model parameters: {}'.format(sum([p.data.nelement() for p in model.parameters()])))
 
