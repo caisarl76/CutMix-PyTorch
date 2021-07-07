@@ -52,11 +52,13 @@ parser.add_argument('--depth', default=32, type=int,
                     help='depth of the network (default: 32)')
 parser.add_argument('--no-bottleneck', dest='bottleneck', action='store_false',
                     help='to use basicblock for CIFAR datasets (default: bottleneck)')
+
 parser.add_argument('--data_root', default='./data', type=str, )
 parser.add_argument('--dataset', dest='dataset', default='imagenet', type=str,
                     help='dataset (options: cifar10, cifar100, cifar100_lt, and imagenet)')
 parser.add_argument('--imb_type', default="exp", type=str, help='imbalance type')
 parser.add_argument('--imb_factor', default=0.1, type=float, help='imbalance factor')
+parser.add_argument('--loss_type', default="CE", type=str, help='loss type')
 parser.add_argument('--no-verbose', dest='verbose', action='store_false',
                     help='to print the status at every iteration')
 parser.add_argument('--alpha', default=300, type=float,
@@ -80,7 +82,7 @@ def main():
     args = parser.parse_args()
     expname = '_'.join(
         [args.dataset, args.imb_type, (str)(args.imb_factor), args.net_type, (str)(args.depth), (str)(args.beta),
-         (str)(args.cutmix_prob)])
+         (str)(args.cutmix_prob), args.loss_type])
     print(expname)
     args.expname = expname
 
