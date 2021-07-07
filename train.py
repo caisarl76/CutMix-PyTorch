@@ -220,8 +220,8 @@ def main():
     cudnn.benchmark = True
 
     # log for training
-    log = open(os.path.join(args.expname, 'log.csv'), 'w')
-    with open(os.path.join(args.expname, 'args.txt'), 'w') as f:
+    log = open(os.path.join('runs',args.expname, 'log.csv'), 'w')
+    with open(os.path.join(runs',args.expname, 'args.txt'), 'w') as f:
         f.write(str(args))
 
 
