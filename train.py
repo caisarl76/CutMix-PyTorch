@@ -83,8 +83,10 @@ def main():
     expname = '_'.join(
         [args.dataset, args.imb_type, (str)(args.imb_factor), args.net_type, (str)(args.depth), (str)(args.beta),
          (str)(args.cutmix_prob), args.loss_type])
-    print(expname)
-    args.expname = expname
+
+    args.expname = os.path.join('runs', expname)
+    if not os.path.exists(args.expname):
+        os.makedirs(args.expname)
 
     if args.dataset.startswith('cifar'):
         normalize = transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
@@ -388,13 +390,13 @@ def validate(val_loader, model, criterion, epoch):
 
 
 def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
-    directory = "runs/%s/" % (args.expname)
+    directory = args.expname
     if not os.path.exists(directory):
         os.makedirs(directory)
     filename = directory + filename
     torch.save(state, filename)
     if is_best:
-        shutil.copyfile(filename, 'runs/%s/' % (args.expname) + 'model_best.pth.tar')
+        shutil.copyfile(filename, args.expname + 'model_best.pth.tar')
 
 
 class AverageMeter(object):
