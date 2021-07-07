@@ -22,6 +22,7 @@ import warnings
 import utils
 import resnet as RN
 import pyramidnet as PYRM
+from losses import *
 from dataset.imbalance_cifar import IMBALANCECIFAR100, IMBALANCECIFAR10
 
 warnings.filterwarnings("ignore")
@@ -51,7 +52,7 @@ parser.add_argument('--depth', default=32, type=int,
                     help='depth of the network (default: 32)')
 parser.add_argument('--no-bottleneck', dest='bottleneck', action='store_false',
                     help='to use basicblock for CIFAR datasets (default: bottleneck)')
-parser.add_argument('--data_root', default='./data', type=str,)
+parser.add_argument('--data_root', default='./data', type=str, )
 parser.add_argument('--dataset', dest='dataset', default='imagenet', type=str,
                     help='dataset (options: cifar10, cifar100, cifar100_lt, and imagenet)')
 parser.add_argument('--imb_type', default="exp", type=str, help='imbalance type')
@@ -77,6 +78,11 @@ best_err5 = 100
 def main():
     global args, best_err1, best_err5
     args = parser.parse_args()
+    expname = '_'.join(
+        [args.dataset, args.imb_type, (str)(args.imb_factor), args.net_type, (str)(args.depth), (str)(args.beta),
+         (str)(args.cutmix_prob)])
+    print(expname)
+    args.expname = expname
 
     if args.dataset.startswith('cifar'):
         normalize = transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
@@ -102,6 +108,7 @@ def main():
                 datasets.CIFAR100(args.data_root, train=False, transform=transform_test),
                 batch_size=args.batch_size, shuffle=True, num_workers=args.workers, pin_memory=True)
             numberofclass = 100
+
         elif args.dataset == 'cifar100_lt':
 
             train_dataset = IMBALANCECIFAR100(phase='train', imbalance_ratio=args.imb_factor, root=args.data_root,
@@ -113,6 +120,7 @@ def main():
                 datasets.CIFAR100(args.data_root, train=False, transform=transform_test),
                 batch_size=args.batch_size, shuffle=True, num_workers=args.workers, pin_memory=True)
             numberofclass = 100
+
         elif args.dataset == 'cifar10':
             train_loader = torch.utils.data.DataLoader(
                 datasets.CIFAR10(args.data_root, train=True, download=True, transform=transform_train),
@@ -121,15 +129,17 @@ def main():
                 datasets.CIFAR10(args.data_root, train=False, transform=transform_test),
                 batch_size=args.batch_size, shuffle=True, num_workers=args.workers, pin_memory=True)
             numberofclass = 10
+
         elif args.dataset == 'cifar10_lt':
             train_dataset = IMBALANCECIFAR10(phase='train', imbalance_ratio=args.imb_factor, root=args.data_root,
-                                              imb_type=args.imb_type)
+                                             imb_type=args.imb_type)
             train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True,
                                                        num_workers=args.workers, pin_memory=True)
             val_loader = torch.utils.data.DataLoader(
                 datasets.CIFAR10(args.data_root, train=False, transform=transform_test),
                 batch_size=args.batch_size, shuffle=True, num_workers=args.workers, pin_memory=True)
             numberofclass = 10
+
         else:
             raise Exception('unknown dataset: {}'.format(args.dataset))
 
@@ -193,13 +203,25 @@ def main():
     print('the number of model parameters: {}'.format(sum([p.data.nelement() for p in model.parameters()])))
 
     # define loss function (criterion) and optimizer
-    criterion = nn.CrossEntropyLoss().cuda()
+    if args.loss_type == 'CE':
+        criterion = nn.CrossEntropyLoss().cuda()
+    elif args.loss_type == 'LDAM':
+        cls_num_list = train_dataset.get_cls_num_list()
+        criterion = LDAMLoss(cls_num_list)
+    elif args.loss_type == 'focal':
+        criterion = FocalLoss()
 
     optimizer = torch.optim.SGD(model.parameters(), args.lr,
                                 momentum=args.momentum,
                                 weight_decay=args.weight_decay, nesterov=True)
 
     cudnn.benchmark = True
+
+    # log for training
+    log = open(os.path.join(args.expname, 'log.csv'), 'w')
+    with open(os.path.join(args.expname, 'args.txt'), 'w') as f:
+        f.write(str(args))
+
 
     for epoch in range(0, args.epochs):
 
