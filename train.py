@@ -34,31 +34,36 @@ model_names = sorted(name for name in models.__dict__
 parser = argparse.ArgumentParser(description='Cutmix PyTorch CIFAR-10, CIFAR-100 and ImageNet-1k Training')
 parser.add_argument('--net_type', default='pyramidnet', type=str,
                     help='networktype: resnet, and pyamidnet')
+parser.add_argument('--depth', default=32, type=int,
+                    help='depth of the network (default: 32)')
+
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
 parser.add_argument('--epochs', default=90, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('-b', '--batch_size', default=128, type=int,
                     metavar='N', help='mini-batch size (default: 256)')
+
+parser.add_argument('--loss_type', default="CE", type=str, help='loss type')
 parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                     metavar='LR', help='initial learning rate')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
                     help='momentum')
 parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float,
                     metavar='W', help='weight decay (default: 1e-4)')
-parser.add_argument('--print-freq', '-p', default=1, type=int,
-                    metavar='N', help='print frequency (default: 10)')
-parser.add_argument('--depth', default=32, type=int,
-                    help='depth of the network (default: 32)')
+
 parser.add_argument('--no-bottleneck', dest='bottleneck', action='store_false',
                     help='to use basicblock for CIFAR datasets (default: bottleneck)')
+parser.add_argument('--print-freq', '-p', default=1, type=int,
+                    metavar='N', help='print frequency (default: 10)')
 
 parser.add_argument('--data_root', default='./data', type=str, )
 parser.add_argument('--dataset', dest='dataset', default='imagenet', type=str,
                     help='dataset (options: cifar10, cifar100, cifar100_lt, and imagenet)')
 parser.add_argument('--imb_type', default="exp", type=str, help='imbalance type')
 parser.add_argument('--imb_factor', default=0.1, type=float, help='imbalance factor')
-parser.add_argument('--loss_type', default="CE", type=str, help='loss type')
+parser.add_argument('--sample_method', default='random', type=str,
+                    choices=['random', 'effective_num', 'inverse_class_freq'])
 parser.add_argument('--no-verbose', dest='verbose', action='store_false',
                     help='to print the status at every iteration')
 parser.add_argument('--alpha', default=300, type=float,
@@ -89,6 +94,9 @@ def main():
         os.makedirs(args.expname)
 
     if args.dataset.startswith('cifar'):
+
+        cls_num_list = None
+
         normalize = transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
                                          std=[x / 255.0 for x in [63.0, 62.1, 66.7]])
 
@@ -123,6 +131,8 @@ def main():
             val_loader = torch.utils.data.DataLoader(
                 datasets.CIFAR100(args.data_root, train=False, transform=transform_test),
                 batch_size=args.batch_size, shuffle=True, num_workers=args.workers, pin_memory=True)
+
+            cls_num_list = train_dataset.get_cls_num_list()
             numberofclass = 100
 
         elif args.dataset == 'cifar10':
@@ -142,6 +152,7 @@ def main():
             val_loader = torch.utils.data.DataLoader(
                 datasets.CIFAR10(args.data_root, train=False, transform=transform_test),
                 batch_size=args.batch_size, shuffle=True, num_workers=args.workers, pin_memory=True)
+            cls_num_list = train_dataset.get_cls_num_list()
             numberofclass = 10
 
         else:
@@ -206,11 +217,18 @@ def main():
     print(model)
     print('the number of model parameters: {}'.format(sum([p.data.nelement() for p in model.parameters()])))
 
+    if args.sample_method == 'effective_num':
+        # calculate effective number of samples for longtail dataset sampler
+        beta = 0.9999
+        effective_num = 1.0 - np.power(beta, cls_num_list)
+        weights = (1.0 - beta) / np.array(effective_num)
+        weights = weights / np.sum(weights) * 100
+
     # define loss function (criterion) and optimizer
     if args.loss_type == 'CE':
         criterion = nn.CrossEntropyLoss().cuda()
     elif args.loss_type == 'LDAM':
-        cls_num_list = train_dataset.get_cls_num_list()
+        # cls_num_list = train_dataset.get_cls_num_list()
         criterion = LDAMLoss(cls_num_list)
     elif args.loss_type == 'focal':
         criterion = FocalLoss()
@@ -226,13 +244,12 @@ def main():
     with open(os.path.join(args.expname, 'args.txt'), 'w') as f:
         f.write(str(args))
 
-
     for epoch in range(0, args.epochs):
 
         adjust_learning_rate(optimizer, epoch)
 
         # train for one epoch
-        train_loss = train(train_loader, model, criterion, optimizer, epoch)
+        train_loss = train(train_loader, model, criterion, optimizer, epoch, weights)
 
         # evaluate on validation set
         err1, err5, val_loss = validate(val_loader, model, criterion, epoch)
@@ -256,7 +273,7 @@ def main():
     print('Best accuracy (top-1 and 5 error):', best_err1, best_err5)
 
 
-def train(train_loader, model, criterion, optimizer, epoch):
+def train(train_loader, model, criterion, optimizer, epoch, weights=None):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -277,9 +294,19 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
         r = np.random.rand(1)
         if args.beta > 0 and r < args.cutmix_prob:
+
             # generate mixed sample
             lam = np.random.beta(args.beta, args.beta)
             rand_index = torch.randperm(input.size()[0]).cuda()
+
+            if not weights == None:
+                from numpy.random import choice
+                # generate mixed samples with effective num.
+                prob_dist = [weights[i - 1] for i in target]
+                prob_dist = prob_dist / np.sum(prob_dist)
+                batch_size = input.size()[0]
+                rand_index = choice(np.array(range(batch_size)), batch_size, p=prob_dist)
+
             target_a = target
             target_b = target[rand_index]
             bbx1, bby1, bbx2, bby2 = rand_bbox(input.size(), lam)
