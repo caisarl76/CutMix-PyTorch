@@ -242,7 +242,7 @@ def main():
     cudnn.benchmark = True
 
     # log for training
-    log = open(os.path.join(args.expname, 'log.csv'), 'w')
+    log_test = open(os.path.join(args.expname, 'log_test.csv'), 'w')
     with open(os.path.join(args.expname, 'args.txt'), 'w') as f:
         f.write(str(args))
 
@@ -254,7 +254,7 @@ def main():
         train_loss = train(train_loader, model, criterion, optimizer, epoch, weights)
 
         # evaluate on validation set
-        err1, err5, val_loss = validate(val_loader, model, criterion, epoch)
+        err1, err5, val_loss = validate(val_loader, model, criterion, epoch, log_test)
 
         # remember best prec@1 and save checkpoint
         is_best = err1 <= best_err1
@@ -271,7 +271,8 @@ def main():
             'best_err5': best_err5,
             'optimizer': optimizer.state_dict(),
         }, is_best)
-
+        log_test.write('%d Epoch err1: %.2f, err5: %.2f \n'%(epoch, err1, err5))
+        log_test.flush()
     print('Best accuracy (top-1 and 5 error):', best_err1, best_err5)
 
 
