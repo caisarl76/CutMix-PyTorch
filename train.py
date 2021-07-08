@@ -301,7 +301,7 @@ def train(train_loader, model, criterion, optimizer, epoch, weights=None):
             lam = np.random.beta(args.beta, args.beta)
             rand_index = torch.randperm(input.size()[0]).cuda()
 
-            if not weights == None:
+            if not weights.all() == None:
                 from numpy.random import choice
                 # generate mixed samples with effective num.
                 prob_dist = [weights[i - 1] for i in target]
