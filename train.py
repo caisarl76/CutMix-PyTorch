@@ -254,7 +254,7 @@ def main():
         train_loss = train(train_loader, model, criterion, optimizer, epoch, weights)
 
         # evaluate on validation set
-        err1, err5, val_loss = validate(val_loader, model, criterion, epoch, log_test)
+        err1, err5, val_loss = validate(val_loader, model, criterion, epoch)
 
         # remember best prec@1 and save checkpoint
         is_best = err1 <= best_err1
