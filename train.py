@@ -133,6 +133,7 @@ def main():
                 batch_size=args.batch_size, shuffle=True, num_workers=args.workers, pin_memory=True)
 
             cls_num_list = train_dataset.get_cls_num_list()
+            print(cls_num_list)
             numberofclass = 100
 
         elif args.dataset == 'cifar10':
@@ -153,6 +154,7 @@ def main():
                 datasets.CIFAR10(args.data_root, train=False, transform=transform_test),
                 batch_size=args.batch_size, shuffle=True, num_workers=args.workers, pin_memory=True)
             cls_num_list = train_dataset.get_cls_num_list()
+            print(cls_num_list)
             numberofclass = 10
 
         else:
