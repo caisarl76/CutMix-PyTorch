@@ -63,7 +63,7 @@ parser.add_argument('--dataset', dest='dataset', default='imagenet', type=str,
 parser.add_argument('--imb_type', default="exp", type=str, help='imbalance type')
 parser.add_argument('--imb_factor', default=0.1, type=float, help='imbalance factor')
 parser.add_argument('--sample_method', default='effective_num', type=str,
-                    choices=['random', 'effective_num', 'inverse_class_freq'])
+                    choices=['random', 'effective_num', 'inverse_class_freq', 'class_balanced'])
 parser.add_argument('--no-verbose', dest='verbose', action='store_false',
                     help='to print the status at every iteration')
 parser.add_argument('--alpha', default=300, type=float,
