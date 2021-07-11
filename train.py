@@ -62,7 +62,7 @@ parser.add_argument('--dataset', dest='dataset', default='imagenet', type=str,
                     help='dataset (options: cifar10, cifar100, cifar100_lt, and imagenet)')
 parser.add_argument('--imb_type', default="exp", type=str, help='imbalance type')
 parser.add_argument('--imb_factor', default=0.1, type=float, help='imbalance factor')
-parser.add_argument('--sample_method', default='random', type=str,
+parser.add_argument('--sample_method', default='effective_num', type=str,
                     choices=['random', 'effective_num', 'inverse_class_freq'])
 parser.add_argument('--no-verbose', dest='verbose', action='store_false',
                     help='to print the status at every iteration')
@@ -225,6 +225,10 @@ def main():
         effective_num = 1.0 - np.power(beta, cls_num_list)
         weights = (1.0 - beta) / np.array(effective_num)
         weights = weights / np.sum(weights) * 100
+    elif args.sample_method == 'class_balacned':
+        weights = np.ones(cls_num_list.shape)
+        weights = weights / np.sum(weights) * 100
+
 
     # define loss function (criterion) and optimizer
     if args.loss_type == 'CE':
@@ -271,7 +275,7 @@ def main():
             'best_err5': best_err5,
             'optimizer': optimizer.state_dict(),
         }, is_best)
-        log_test.write('%d Epoch err1: %.2f, err5: %.2f \n'%(epoch, err1, err5))
+        log_test.write('%d Epoch err1: %.2f, err5: %.2f \n' % (epoch, err1, err5))
         log_test.flush()
     print('Best accuracy (top-1 and 5 error):', best_err1, best_err5)
 
@@ -423,10 +427,10 @@ def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
     directory = args.expname
     if not os.path.exists(directory):
         os.makedirs(directory)
-    filename = directory + filename
+    filename = os.path.join(directory, filename)
     torch.save(state, filename)
     if is_best:
-        shutil.copyfile(filename, args.expname + 'model_best.pth.tar')
+        shutil.copyfile(filename, os.path.join(args.expname, 'model_best.pth.tar'))
 
 
 class AverageMeter(object):
