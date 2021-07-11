@@ -226,7 +226,7 @@ def main():
         weights = (1.0 - beta) / np.array(effective_num)
         weights = weights / np.sum(weights) * 100
     elif args.sample_method == 'class_balanced':
-        weights = np.ones(cls_num_list.shape)
+        weights = np.ones(len(cls_num_list))
         weights = weights / np.sum(weights) * 100
 
 
