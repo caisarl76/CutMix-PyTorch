@@ -72,8 +72,7 @@ parser.add_argument('--expname', default='TEST', type=str,
                     help='name of experiment')
 parser.add_argument('--beta', default=0, type=float,
                     help='hyperparameter beta')
-parser.add_argument('--cutmix_prob', default=0, type=float,
-                    help='cutmix probability')
+parser.add_argument('--cutmix_prob', default=0, type=float, help='cutmix probability')
 
 parser.set_defaults(bottleneck=True)
 parser.set_defaults(verbose=True)
@@ -87,7 +86,7 @@ def main():
     args = parser.parse_args()
     expname = '_'.join(
         [args.dataset, args.imb_type, (str)(args.imb_factor), args.net_type, (str)(args.depth), args.sample_method,
-         (str)(args.beta), (str)(args.cutmix_prob), args.loss_type, ('lr'+(str)(args.lr))])
+         (str)(args.beta), (str)(args.cutmix_prob), args.loss_type, ('lr' + (str)(args.lr))])
 
     args.expname = os.path.join('runs', expname)
     if not os.path.exists(args.expname):
@@ -229,7 +228,6 @@ def main():
         weights = np.ones(len(cls_num_list))
         weights = weights / np.sum(weights) * 100
 
-
     # define loss function (criterion) and optimizer
     if args.loss_type == 'CE':
         criterion = nn.CrossEntropyLoss().cuda()
@@ -278,6 +276,8 @@ def main():
         log_test.write('%d Epoch err1: %.2f, err5: %.2f \n' % (epoch, err1, err5))
         log_test.flush()
     print('Best accuracy (top-1 and 5 error):', best_err1, best_err5)
+    log_test.write('Best accuracy (top-1 and 5 error): %.2f, %.2f' % (best_err1, best_err5))
+    log_test.flush()
 
 
 def train(train_loader, model, criterion, optimizer, epoch, weights=None):
