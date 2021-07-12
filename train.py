@@ -232,7 +232,7 @@ def main():
     if args.loss_type == 'CE':
         criterion = nn.CrossEntropyLoss().cuda()
     elif args.loss_type == 'LDAM':
-        # cls_num_list = train_dataset.get_cls_num_list()
+        cls_num_list = train_dataset.get_cls_num_list()
         criterion = LDAMLoss(cls_num_list)
     elif args.loss_type == 'focal':
         criterion = FocalLoss()
