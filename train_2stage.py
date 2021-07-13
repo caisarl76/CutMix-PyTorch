@@ -149,7 +149,6 @@ def main():
 
     cudnn.benchmark = True
 
-
     ############################## STAGE1 ##############################
     # log for training
     save_dir = os.path.join(args.expname, 'stage1')
@@ -202,8 +201,19 @@ def main():
         f.write(str(args))
     args.sample_method = 'random'
     args.beta = 0
-    torch.nn.init.xavier_uniform(model.fc.weight)
 
+    optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad, model.parameters()),
+                                args.lr,
+                                momentum=args.momentum,
+                                weight_decay=args.weight_decay, nesterov=True)
+    for name, p in model.named_parameters():
+        if 'fc' in name:
+            p.requires_grad = True
+        else:
+            p.requires_grad = False
+
+    torch.nn.init.xavier_uniform(model.fc.weight)
+    optimizer.add_param_group({'params': model.fc.parameters()})
 
     for epoch in range(0, args.epochs):
 
@@ -235,6 +245,7 @@ def main():
     print('Best accuracy (top-1 and 5 error):', best_err1, best_err5)
     log_test.write('Best accuracy (top-1 and 5 error): %.2f, %.2f' % (best_err1, best_err5))
     log_test.flush()
+
 
 def train(train_loader, model, criterion, optimizer, epoch, weights=None):
     batch_time = AverageMeter()
@@ -359,7 +370,6 @@ def validate(val_loader, model, criterion, epoch):
     print('* Epoch: [{0}/{1}]\t Top 1-err {top1.avg:.3f}  Top 5-err {top5.avg:.3f}\t Test Loss {loss.avg:.3f}'.format(
         epoch, args.epochs, top1=top1, top5=top5, loss=losses))
     return top1.avg, top5.avg, losses.avg
-
 
 
 if __name__ == '__main__':
