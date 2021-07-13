@@ -3,8 +3,8 @@ import shutil
 import torch
 import numpy as np
 
-def save_checkpoint(args, state, is_best, filename='checkpoint.pth.tar'):
-    directory = args.expname
+def save_checkpoint(save_dir, state, is_best, filename='checkpoint.pth.tar'):
+    directory = save_dir
     if not os.path.exists(directory):
         os.makedirs(directory)
     filename = os.path.join(directory, filename)
