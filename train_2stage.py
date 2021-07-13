@@ -207,7 +207,7 @@ def main():
 
     for epoch in range(0, args.epochs):
 
-        adjust_learning_rate(optimizer, epoch)
+        adjust_learning_rate(args, optimizer, epoch)
 
         # train for one epoch
         train_loss = train(train_loader, model, criterion, optimizer, epoch)
