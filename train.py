@@ -218,6 +218,7 @@ def main():
     print(model)
     print('the number of model parameters: {}'.format(sum([p.data.nelement() for p in model.parameters()])))
 
+
     if args.sample_method == 'effective_num':
         # calculate effective number of samples for longtail dataset sampler
         beta = 0.9999
@@ -227,6 +228,8 @@ def main():
     elif args.sample_method == 'class_balanced':
         weights = np.ones(len(cls_num_list))
         weights = weights / np.sum(weights) * 100
+    else:
+        weights = None
 
     # define loss function (criterion) and optimizer
     if args.loss_type == 'CE':
