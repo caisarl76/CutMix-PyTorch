@@ -202,6 +202,8 @@ def main():
         f.write(str(args))
     args.sample_method = 'random'
     args.beta = 0
+    torch.nn.init.xavier_uniform(model.fc.weight)
+
 
     for epoch in range(0, args.epochs):
 
