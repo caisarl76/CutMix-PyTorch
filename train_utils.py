@@ -10,7 +10,7 @@ def save_checkpoint(save_dir, state, is_best, filename='checkpoint.pth.tar'):
     filename = os.path.join(directory, filename)
     torch.save(state, filename)
     if is_best:
-        shutil.copyfile(filename, os.path.join(args.expname, 'model_best.pth.tar'))
+        shutil.copyfile(filename, os.path.join(save_dir, 'model_best.pth.tar'))
 
 
 class AverageMeter(object):
