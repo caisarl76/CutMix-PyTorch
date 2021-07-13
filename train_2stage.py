@@ -153,6 +153,9 @@ def main():
     ############################## STAGE1 ##############################
     # log for training
     save_dir = os.path.join(args.expname, 'stage1')
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+
     log_test = open(os.path.join(save_dir, 'log_test.csv'), 'w')
     with open(os.path.join(save_dir, 'args.txt'), 'w') as f:
         f.write(str(args))
@@ -190,7 +193,10 @@ def main():
 
     ############################## STAGE2 ##############################
     # log for training
+
     save_dir = os.path.join(args.expname, 'stage2')
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
     log_test = open(os.path.join(save_dir, 'log_test.csv'), 'w')
     with open(os.path.join(save_dir, 'args.txt'), 'w') as f:
         f.write(str(args))
