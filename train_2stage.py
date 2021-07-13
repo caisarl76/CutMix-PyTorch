@@ -206,14 +206,14 @@ def main():
                                 args.lr,
                                 momentum=args.momentum,
                                 weight_decay=args.weight_decay, nesterov=True)
-    for name, p in model.named_parameters():
-        if 'fc' in name:
-            p.requires_grad = True
-        else:
-            p.requires_grad = False
+    for p in model.parameters():
+        p.requires_grad = False
+
+    model.fc.weight.requires_grad = True
+    model.fc.bias.requires_grad = True
 
     torch.nn.init.xavier_uniform(model.fc.weight)
-    optimizer.add_param_group({'params': model.fc.parameters()})
+    # optimizer.add_param_group({'params': model.fc.parameters()})
 
     for epoch in range(0, args.epochs):
 
