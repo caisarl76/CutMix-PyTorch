@@ -111,6 +111,7 @@ class ResNet(nn.Module):
                 self.scales = Parameter(torch.ones(num_classes))
 
         elif dataset == 'imagenet':
+            print('------------------------------------------------------')
             blocks = {18: BasicBlock, 34: BasicBlock, 50: Bottleneck, 101: Bottleneck, 152: Bottleneck, 200: Bottleneck}
             layers = {18: [2, 2, 2, 2], 34: [3, 4, 6, 3], 50: [3, 4, 6, 3], 101: [3, 4, 23, 3], 152: [3, 8, 36, 3],
                       200: [3, 24, 36, 3]}
