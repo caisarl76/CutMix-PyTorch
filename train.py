@@ -89,6 +89,7 @@ def main():
          (str)(args.beta), (str)(args.cutmix_prob), args.loss_type, ('lr' + (str)(args.lr))])
     print(expname)
     print(args.depth)
+    return
     args.expname = os.path.join('runs', expname)
     if not os.path.exists(args.expname):
         os.makedirs(args.expname)
