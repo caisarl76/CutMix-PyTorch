@@ -91,7 +91,7 @@ def main():
     args = parser.parse_args()
     expname = '_'.join(
         [args.dataset, args.imb_type, (str)(args.imb_factor), args.net_type, (str)(args.depth),
-         args.sample_method, (str)(args.beta), (str)(args.cutmix_prob), args.loss_type, ('lr' + (str)(args.lr))])
+         args.sample_method, (str)(args.beta), (str)(args.cutmix_prob), args.loss_type, ('lr' + (str)(args.lr)), args.sampler])
 
     args.expname = os.path.join('runs', 'two_stage', expname)
     if not os.path.exists(args.expname):
