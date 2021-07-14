@@ -54,6 +54,8 @@ parser.add_argument('--imb_type', default="exp", type=str, help='imbalance type'
 parser.add_argument('--imb_factor', default=0.1, type=float, help='imbalance factor')
 parser.add_argument('--sample_method', default='effective_num', type=str,
                     choices=['random', 'effective_num', 'inverse_class_freq', 'class_balanced'])
+parser.add_argument('--sampler', default="random", type=str,
+                    choices=['random', 'class_balanced'])
 
 parser.add_argument('--no-verbose', dest='verbose', action='store_false',
                     help='to print the status at every iteration')
@@ -214,6 +216,17 @@ def main():
 
     torch.nn.init.xavier_uniform(model.fc.weight)
     # optimizer.add_param_group({'params': model.fc.parameters()})
+
+    if args.sampler == 'class_balanced':
+        from dataset.ClassAwareSampler import get_sampler
+        sampler_dic = {
+            'sampler': get_sampler(),
+            'params': {'num_samples_cls': 4}
+        }
+        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.workers,
+                                                   pin_memory=True,
+                                                   sampler=sampler_dic['sampler'](train_dataset,
+                                                                                  **sampler_dic['params']))
 
     for epoch in range(0, args.epochs):
 

@@ -87,4 +87,28 @@ class ClassAwareSampler(Sampler):
 def get_sampler():
     return ClassAwareSampler
 
+
 ##################################
+
+
+if __name__ == '__main__':
+    sampler_dic = {
+        'sampler': get_sampler(),
+        'params': {'num_samples_cls': 4}
+    }
+
+    from imbalance_cifar import IMBALANCECIFAR100
+
+    trainset = IMBALANCECIFAR100(phase='train', imbalance_ratio=0.1, root='./data')
+    print(len(trainset))
+
+    import torch
+    import torch.utils.data
+
+    loader = torch.utils.data.DataLoader(trainset, batch_size=40, num_workers=0, pin_memory=True,
+                                         sampler=sampler_dic['sampler'](trainset, **sampler_dic['params']))
+
+    for i, (inputs, labels) in enumerate(loader):
+        print(inputs.shape)
+        print(labels)
+        break
