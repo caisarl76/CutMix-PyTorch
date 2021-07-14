@@ -1,6 +1,8 @@
 # Original code: https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py
 
+import torch
 import torch.nn as nn
+from torch.nn.parameter import Parameter
 import math
 
 
@@ -83,9 +85,10 @@ class Bottleneck(nn.Module):
 
 
 class ResNet(nn.Module):
-    def __init__(self, dataset, depth, num_classes, bottleneck=False):
+    def __init__(self, dataset, depth, num_classes, tau=False, bottleneck=False):
         super(ResNet, self).__init__()
         self.dataset = dataset
+        self.tau = tau
         if self.dataset.startswith('cifar'):
             self.inplanes = 16
             print(bottleneck)
@@ -104,6 +107,8 @@ class ResNet(nn.Module):
             self.layer3 = self._make_layer(block, 64, n, stride=2)
             self.avgpool = nn.AvgPool2d(8)
             self.fc = nn.Linear(64 * block.expansion, num_classes)
+            if self.tau:
+                self.scales = Parameter(torch.ones(num_classes))
 
         elif dataset == 'imagenet':
             blocks = {18: BasicBlock, 34: BasicBlock, 50: Bottleneck, 101: Bottleneck, 152: Bottleneck, 200: Bottleneck}
@@ -161,6 +166,9 @@ class ResNet(nn.Module):
             x = self.avgpool(x)
             x = x.view(x.size(0), -1)
             x = self.fc(x)
+            if self.tau:
+                x *= self.scales
+
 
         elif self.dataset == 'imagenet':
             x = self.conv1(x)
