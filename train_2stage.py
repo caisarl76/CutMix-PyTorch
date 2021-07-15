@@ -30,7 +30,7 @@ parser = argparse.ArgumentParser(description='Cutmix PyTorch CIFAR-10, CIFAR-100
 parser.add_argument('--net_type', default='resnet', type=str, help='networktype: resnet, and pyamidnet')
 parser.add_argument('--depth', default=32, type=int, help='depth of the network (default: 32)')
 
-parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
+parser.add_argument('-j', '--workers', default=2, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
 parser.add_argument('--epochs', default=90, type=int, metavar='N',
                     help='number of total epochs to run')
