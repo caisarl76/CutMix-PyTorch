@@ -234,7 +234,7 @@ def main():
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.workers,
                                                    pin_memory=True, shuffle=True)
 
-    for epoch in range(0, args.epochs):
+    for epoch in range(0, 50):
 
         adjust_learning_rate(args, optimizer, epoch)
 
