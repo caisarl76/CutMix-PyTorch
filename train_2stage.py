@@ -38,7 +38,7 @@ parser.add_argument('-b', '--batch_size', default=128, type=int,
                     metavar='N', help='mini-batch size (default: 256)')
 
 parser.add_argument('--loss_type', default="CE", type=str, help='loss type')
-parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
+parser.add_argument('--lr', '--learning-rate', default=0.25, type=float,
                     metavar='LR', help='initial learning rate')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
                     help='momentum')
@@ -55,7 +55,7 @@ parser.add_argument('--imb_factor', default=0.1, type=float, help='imbalance fac
 parser.add_argument('--sample_method', default='effective_num', type=str,
                     choices=['random', 'effective_num', 'inverse_class_freq', 'class_balanced'])
 parser.add_argument('--sampler', default="random", type=str,
-                    choices=['random', 'class_balanced'])
+                    choices=['none', 'class_balanced'])
 
 parser.add_argument('--no-verbose', dest='verbose', action='store_false',
                     help='to print the status at every iteration')
@@ -92,7 +92,8 @@ def main():
 
     expname = '_'.join(
         [args.dataset, args.imb_type, (str)(args.imb_factor), args.net_type, (str)(args.depth),
-         args.sample_method, (str)(args.beta), (str)(args.cutmix_prob), args.loss_type, ('lr' + (str)(args.lr)), args.sampler])
+         args.sample_method, (str)(args.beta), (str)(args.cutmix_prob), args.loss_type, ('lr' + (str)(args.lr)),
+         ('epochs' + (str)(args.epochs)), args.sampler])
 
     args.expname = os.path.join('runs', 'two_stage', expname)
     if not os.path.exists(args.expname):
@@ -205,10 +206,6 @@ def main():
     args.sample_method = 'random'
     args.beta = 0
 
-    optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad, model.parameters()),
-                                args.lr,
-                                momentum=args.momentum,
-                                weight_decay=args.weight_decay, nesterov=True)
     for p in model.parameters():
         p.requires_grad = False
 
@@ -217,6 +214,11 @@ def main():
 
     torch.nn.init.xavier_uniform(model.fc.weight)
     # optimizer.add_param_group({'params': model.fc.parameters()})
+
+    optimizer = torch.optim.SGD(filter(lambda p: p.requires_grad, model.parameters()),
+                                lr=0.1,
+                                momentum=args.momentum,
+                                weight_decay=args.weight_decay, nesterov=True)
 
     if args.sampler == 'class_balanced':
         from dataset.ClassAwareSampler import get_sampler
@@ -228,6 +230,9 @@ def main():
                                                    pin_memory=True,
                                                    sampler=sampler_dic['sampler'](train_dataset,
                                                                                   **sampler_dic['params']))
+    else:
+        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.workers,
+                                                   pin_memory=True, shuffle=True)
 
     for epoch in range(0, args.epochs):
 
