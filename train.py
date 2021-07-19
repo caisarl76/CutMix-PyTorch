@@ -5,8 +5,6 @@ import os
 import shutil
 import time
 
-import torch
-import torch.nn as nn
 import torch.nn.parallel
 import torch.backends.cudnn as cudnn
 import torch.optim
@@ -15,14 +13,12 @@ import torch.utils.data.distributed
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
-import numpy as np
 
 import warnings
 
 import utils
-import resnet as RN
-import pyramidnet as PYRM
-from losses import *
+from utils import resnet as RN, pyramidnet as PYRM
+from utils.losses import *
 from dataset.imbalance_cifar import IMBALANCECIFAR100, IMBALANCECIFAR10
 
 warnings.filterwarnings("ignore")
@@ -257,6 +253,9 @@ def main():
 
         # train for one epoch
         train_loss = train(train_loader, model, criterion, optimizer, epoch, weights)
+
+        if hasattr(train_loader.sampler, 'reset_weights'):
+            train_loader.sampler.reset_weights(epoch)
 
         # evaluate on validation set
         err1, err5, val_loss = validate(val_loader, model, criterion, epoch)

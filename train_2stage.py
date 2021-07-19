@@ -1,12 +1,9 @@
 # original code: https://github.com/dyhan0920/PyramidNet-PyTorch/blob/master/train.py
 
 import argparse
-import os
-import shutil
 import time
+import os
 
-import torch
-import torch.nn as nn
 import torch.nn.parallel
 import torch.backends.cudnn as cudnn
 import torch.optim
@@ -14,17 +11,12 @@ import torch.utils.data
 import torch.utils.data.distributed
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
-import torchvision.models as models
-import numpy as np
 
-import warnings
-
-import utils
-import resnet as RN
-import pyramidnet as PYRM
-from losses import *
+from utils import resnet as RN
+from utils import pyramidnet as PYRM
+from utils.losses import *
+from utils.train_utils import *
 from dataset.imbalance_cifar import IMBALANCECIFAR100
-from train_utils import *
 
 parser = argparse.ArgumentParser(description='Cutmix PyTorch CIFAR-10, CIFAR-100 and ImageNet-1k Training')
 parser.add_argument('--net_type', default='resnet', type=str, help='networktype: resnet, and pyamidnet')
@@ -55,7 +47,7 @@ parser.add_argument('--imb_factor', default=0.1, type=float, help='imbalance fac
 parser.add_argument('--sample_method', default='effective_num', type=str,
                     choices=['random', 'effective_num', 'inverse_class_freq', 'class_balanced'])
 parser.add_argument('--sampler', default="random", type=str,
-                    choices=['none', 'class_balanced'])
+                    choices=['none', 'class_balanced', 'squareroot'])
 
 parser.add_argument('--no-verbose', dest='verbose', action='store_false',
                     help='to print the status at every iteration')
@@ -225,6 +217,17 @@ def main():
         sampler_dic = {
             'sampler': get_sampler(),
             'params': {'num_samples_cls': 4}
+        }
+        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.workers,
+                                                   pin_memory=True,
+                                                   sampler=sampler_dic['sampler'](train_dataset,
+                                                                                  **sampler_dic['params']))
+    elif args.sampler == 'squareroot':
+        from dataset.MIxedPrioritizedSampler import get_sampler
+        sampler_dic = {
+            'sampler': get_sampler(),
+            'params': {'alpha': 1.0, 'cycle': 0, 'decay_gap': 30, 'epochs': 200, 'fixed_scale': 1, 'lam': 1.0,
+                       'manual_only': True, 'nroot': 2.0, 'ptype': 'score', 'rescale': 'false', 'root_decay': 'null'}
         }
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.workers,
                                                    pin_memory=True,
