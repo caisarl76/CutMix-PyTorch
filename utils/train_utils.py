@@ -3,6 +3,7 @@ import shutil
 import torch
 import numpy as np
 
+
 def save_checkpoint(save_dir, state, is_best, filename='checkpoint.pth.tar'):
     directory = save_dir
     if not os.path.exists(directory):
@@ -45,6 +46,20 @@ def adjust_learning_rate(args, optimizer, epoch):
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
+
+def adjust_cutmix_prob(args, epoch):
+    if args.cutmix_sche == None:
+        cutmix_prob = args.cutmix_prob
+    elif args.cutmix_sche == 'linear':
+        factor = epoch / args.epochs
+        cutmix_prob = args.cutmix_prob * factor
+    elif args.cutmix_sche == 'cosine':
+        factor = (epoch % 50) / 25
+        cutmix_prob = args.cutmix_prob * (np.cos(np.pi * factor) + 1)
+    elif args.cutmix_sche == 'periodic':
+        factor = (epoch % 50) / 50
+        cutmix_prob = args.cutmix_prob * factor
+    return cutmix_prob
 
 def get_learning_rate(optimizer):
     lr = []

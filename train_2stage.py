@@ -45,7 +45,7 @@ parser.add_argument('--dataset', dest='dataset', default='cifar100_lt', type=str
 parser.add_argument('--imb_type', default="exp", type=str, help='imbalance type')
 parser.add_argument('--imb_factor', default=0.1, type=float, help='imbalance factor')
 parser.add_argument('--sample_method', default='effective_num', type=str,
-                    choices=['random', 'effective_num', 'inverse_class_freq', 'class_balanced'])
+                    choices=['none', 'effective_num', 'class'])
 parser.add_argument('--sampler', default="random", type=str,
                     choices=['none', 'class_balanced', 'squareroot'])
 
@@ -55,7 +55,9 @@ parser.add_argument('--alpha', default=300, type=float,
                     help='number of new channel increases per depth (default: 300)')
 parser.add_argument('--expname', default='TEST', type=str, help='name of experiment')
 parser.add_argument('--beta', default=0, type=float, help='hyperparameter beta')
-parser.add_argument('--cutmix_prob', default=0, type=float, help='cutmix probability')
+parser.add_argument('--cutmix_prob', default=0, type=float, choices=[0.0, 0.3, 0.5, 0.7])
+parser.add_argument('--cutmix_sche', default=None, type=str, choices=[None, 'linear', 'periodic', 'cosine'])
+parser.add_argument('--cutmix_range', type=list, choices=[[0.0, 0.5], [0.5, 1.0], [0.0, 1.0]])
 
 parser.set_defaults(bottleneck=True)
 parser.set_defaults(verbose=True)
@@ -81,10 +83,12 @@ best_err5 = 100
 def main():
     global args, best_err1, best_err5
     args = parser.parse_args()
-
+    datasplit = (args.dataset + args.imb_type + (str)(args.imb_factor))
+    modelsplit = (args.net_type + (str)(args.depth))
     expname = '_'.join(
-        [args.dataset, args.imb_type, (str)(args.imb_factor), args.net_type, (str)(args.depth),
-         args.sample_method, (str)(args.beta), (str)(args.cutmix_prob), args.loss_type, ('lr' + (str)(args.lr)),
+        [args.sample_method,
+         (str)(args.beta), (str)(args.cutmix_prob),
+         args.loss_type, ('lr' + (str)(args.lr)),
          ('epochs' + (str)(args.epochs)), args.sampler])
 
     args.expname = os.path.join('runs', 'two_stage', expname)
@@ -158,9 +162,9 @@ def main():
     for epoch in range(0, args.epochs):
 
         adjust_learning_rate(args, optimizer, epoch)
-
+        cutmix_prob = adjust_cutmix_prob(args, epoch)
         # train for one epoch
-        train_loss = train(train_loader, model, criterion, optimizer, epoch, weights)
+        train_loss = train(train_loader, model, criterion, optimizer, epoch, weights, cutmix_prob)
 
         # evaluate on validation set
         err1, err5, val_loss = validate(val_loader, model, criterion, epoch)
@@ -269,7 +273,7 @@ def main():
     log_test.flush()
 
 
-def train(train_loader, model, criterion, optimizer, epoch, weights=None):
+def train(train_loader, model, criterion, optimizer, epoch, weights=None, cutmix_prob=None):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -278,9 +282,12 @@ def train(train_loader, model, criterion, optimizer, epoch, weights=None):
 
     # switch to train mode
     model.train()
-
     end = time.time()
     current_LR = get_learning_rate(optimizer)[0]
+
+    if not cutmix_prob:
+        cutmix_prob = args.cutmix_prob
+
     for i, (input, target) in enumerate(train_loader):
         # measure data loading time
         data_time.update(time.time() - end)
@@ -289,7 +296,7 @@ def train(train_loader, model, criterion, optimizer, epoch, weights=None):
         target = target.cuda()
 
         r = np.random.rand(1)
-        if args.beta > 0 and r < args.cutmix_prob:
+        if args.beta > 0 and r < cutmix_prob:
 
             # generate mixed sample
             lam = np.random.beta(args.beta, args.beta)
