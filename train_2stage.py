@@ -45,7 +45,7 @@ parser.add_argument('--dataset', dest='dataset', default='cifar100_lt', type=str
 parser.add_argument('--imb_type', default="exp", type=str, help='imbalance type')
 parser.add_argument('--imb_factor', default=0.1, type=float, help='imbalance factor')
 parser.add_argument('--sample_method', default='effective_num', type=str,
-                    choices=['random', 'effective_num', 'class'])
+                    choices=['random', 'effective_num', 'class_balanced'])
 parser.add_argument('--sampler', default="random", type=str,
                     choices=['none', 'class_balanced', 'squareroot'])
 
@@ -91,6 +91,7 @@ def main():
          ('epochs' + (str)(args.epochs)), args.sampler])
 
     args.expname = os.path.join('runs', 'two_stage', datasplit, modelsplit, expname)
+    print('saving in ', args.expname)
     if not os.path.exists(args.expname):
         os.makedirs(args.expname)
 
