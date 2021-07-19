@@ -158,9 +158,8 @@ def main():
     log_test = open(os.path.join(save_dir, 'log_test.csv'), 'w')
     with open(os.path.join(save_dir, 'args.txt'), 'w') as f:
         f.write(str(args))
-
+    cutmix_prob = args.cutmix_prob
     for epoch in range(0, args.epochs):
-
         adjust_learning_rate(args, optimizer, epoch)
         cutmix_prob = adjust_cutmix_prob(args, epoch)
         # train for one epoch
