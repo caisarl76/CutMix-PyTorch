@@ -227,7 +227,7 @@ def main():
         sampler_dic = {
             'sampler': get_sampler(),
             'params': {'alpha': 1.0, 'cycle': 0, 'decay_gap': 30, 'epochs': 200, 'fixed_scale': 1, 'lam': 1.0,
-                       'manual_only': True, 'nroot': 2.0, 'ptype': 'score', 'rescale': 'false', 'root_decay': 'null'}
+                       'manual_only': True, 'nroot': 2.0, 'ptype': 'score', 'rescale': 'false', 'root_decay': None}
         }
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.workers,
                                                    pin_memory=True,
