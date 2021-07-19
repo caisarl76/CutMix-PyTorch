@@ -45,7 +45,7 @@ parser.add_argument('--dataset', dest='dataset', default='cifar100_lt', type=str
 parser.add_argument('--imb_type', default="exp", type=str, help='imbalance type')
 parser.add_argument('--imb_factor', default=0.1, type=float, help='imbalance factor')
 parser.add_argument('--sample_method', default='effective_num', type=str,
-                    choices=['none', 'effective_num', 'class'])
+                    choices=['random', 'effective_num', 'class'])
 parser.add_argument('--sampler', default="random", type=str,
                     choices=['none', 'class_balanced', 'squareroot'])
 
