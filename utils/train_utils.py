@@ -48,7 +48,7 @@ def adjust_learning_rate(args, optimizer, epoch):
 
 
 def adjust_cutmix_prob(args, epoch):
-    if args.cutmix_sche == None:
+    if args.cutmix_sche == 'none':
         cutmix_prob = args.cutmix_prob
     elif args.cutmix_sche == 'linear':
         factor = epoch / args.epochs
