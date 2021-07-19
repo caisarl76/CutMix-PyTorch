@@ -59,6 +59,8 @@ def adjust_cutmix_prob(args, epoch):
     elif args.cutmix_sche == 'periodic':
         factor = (epoch % 50) / 50
         cutmix_prob = args.cutmix_prob * factor
+    else:
+        return None
     return cutmix_prob
 
 def get_learning_rate(optimizer):
