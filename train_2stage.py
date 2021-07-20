@@ -82,7 +82,7 @@ best_err5 = 100
 def main():
     global args, best_err1, best_err5
     args = parser.parse_args()
-    datasplit = (args.dataset + args.imb_type + (str)(args.imb_factor))
+    datasplit = '_'.join([args.dataset, args.imb_type, (str)(args.imb_factor)])
     modelsplit = (args.net_type + (str)(args.depth))
     expname = '_'.join(
         [args.sample_method,
