@@ -69,6 +69,7 @@ parser.add_argument('--expname', default='TEST', type=str,
 parser.add_argument('--beta', default=0, type=float,
                     help='hyperparameter beta')
 parser.add_argument('--cutmix_prob', default=0, type=float, help='cutmix probability')
+parser.add_argument('--resize_mix', action='store_true')
 
 parser.set_defaults(bottleneck=True)
 parser.set_defaults(verbose=True)
