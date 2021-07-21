@@ -66,9 +66,9 @@ parser.add_argument('--alpha', default=300, type=float,
                     help='number of new channel increases per depth (default: 300)')
 parser.add_argument('--expname', default='TEST', type=str,
                     help='name of experiment')
-parser.add_argument('--beta', default=0, type=float,
+parser.add_argument('--beta', default=1.0, type=float,
                     help='hyperparameter beta')
-parser.add_argument('--cutmix_prob', default=0, type=float, help='cutmix probability')
+parser.add_argument('--cutmix_prob', default=0.5, type=float, help='cutmix probability')
 parser.add_argument('--resize_mix', action='store_true')
 
 parser.set_defaults(bottleneck=True)
