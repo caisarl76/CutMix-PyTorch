@@ -47,15 +47,15 @@ parser.add_argument('--imb_factor', default=0.1, type=float, help='imbalance fac
 parser.add_argument('--sample_method', default='effective_num', type=str,
                     choices=['random', 'effective_num', 'class_balanced', 'square_root'])
 parser.add_argument('--sampler', default="class_balanced", type=str,
-                    choices=['none', 'class_balanced', 'squareroot'])
+                    choices=['none', 'class_balanced', 'square_root'])
 
 parser.add_argument('--no-verbose', dest='verbose', action='store_false',
                     help='to print the status at every iteration')
 parser.add_argument('--alpha', default=300, type=float,
                     help='number of new channel increases per depth (default: 300)')
 parser.add_argument('--expname', default='TEST', type=str, help='name of experiment')
-parser.add_argument('--beta', default=0, type=float, help='hyperparameter beta')
-parser.add_argument('--cutmix_prob', default=0, type=float, choices=[0.0, 0.3, 0.5, 0.7])
+parser.add_argument('--beta', default=1.0, type=float, help='hyperparameter beta')
+parser.add_argument('--cutmix_prob', default=0.5, type=float, choices=[0.0, 0.3, 0.5, 0.7])
 parser.add_argument('--cutmix_sche', default=None, type=str, choices=['none', 'linear', 'periodic', 'cosine'])
 
 parser.set_defaults(bottleneck=True)
@@ -229,7 +229,7 @@ def main():
                                                    pin_memory=True,
                                                    sampler=sampler_dic['sampler'](train_dataset,
                                                                                   **sampler_dic['params']))
-    elif args.sampler == 'squareroot':
+    elif args.sampler == 'square_root':
         from dataset.MIxedPrioritizedSampler import get_sampler
         sampler_dic = {
             'sampler': get_sampler(),
