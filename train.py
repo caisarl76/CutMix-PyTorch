@@ -409,17 +409,15 @@ def resizemix(images, lam):
     cut_h = np.int(H * res_len)
     res_len = np.int(W * res_len)
     # uniform
-    cx = np.random.randint(W)
-    cy = np.random.randint(H)
+    bbx1 = np.random.randint(W - res_len)
+    bby1 = np.random.randint(H - res_len)
 
-    bbx1 = np.clip(cx - (cut_w // 2), 0, W)
-    bby1 = np.clip(cy - (cut_h // 2), 0, H)
-    bbx2 = np.clip(cx + (cut_w // 2), 0, W)
-    bby2 = np.clip(cy + (cut_h // 2), 0, H)
+    # bbx2 = np.clip(cx + (cut_w // 2), 0, W)
+    # bby2 = np.clip(cy + (cut_h // 2), 0, H)
 
     resized = F.interpolate(images, size=res_len)
 
-    return resized, bbx1, bby1, bbx2, bby2
+    return resized, bbx1, bby1, bbx1 + res_len, bby1 + res_len
 
 
 def validate(val_loader, model, criterion, epoch):
