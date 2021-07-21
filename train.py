@@ -408,14 +408,17 @@ def resizemix(images, lam):
     cut_w = np.int(W * res_len)
     cut_h = np.int(H * res_len)
     res_len = np.int(W * res_len)
+    assert res_len == 0
+
     # uniform
     bbx1 = np.random.randint(W - res_len)
     bby1 = np.random.randint(H - res_len)
 
     # bbx2 = np.clip(cx + (cut_w // 2), 0, W)
     # bby2 = np.clip(cy + (cut_h // 2), 0, H)
-
+    print(res_len)
     resized = F.interpolate(images, size=res_len)
+
 
     return resized, bbx1, bby1, bbx1 + res_len, bby1 + res_len
 
