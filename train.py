@@ -403,7 +403,7 @@ def resizemix(images, lam):
     size = images.size()
     W = size[2]
     H = size[3]
-    assert W != 0
+    assert W == 0
     res_len = np.sqrt(1. - lam)
     cut_w = np.int(W * res_len)
     cut_h = np.int(H * res_len)
