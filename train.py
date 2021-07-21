@@ -405,13 +405,14 @@ def resizemix(images, lam):
     W = size[2]
     H = size[3]
 
-    if W * H == 0:
-        return images, 0, 0, 0, 0
-
     res_len = np.sqrt(1. - lam)
     cut_w = np.int(W * res_len)
     cut_h = np.int(H * res_len)
     res_len = np.int(W * res_len)
+
+    if res_len == 0:
+        return images, 0, 0, 0, 0
+
 
     # uniform
     bbx1 = np.random.randint(W - res_len)
