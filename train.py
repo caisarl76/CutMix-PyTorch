@@ -167,12 +167,12 @@ def main():
                                          std=[0.229, 0.224, 0.225])
 
         jittering = ColorJitter(brightness=0.4, contrast=0.4,
-                                      saturation=0.4)
+                                saturation=0.4)
         lighting = Lighting(alphastd=0.1,
-                                  eigval=[0.2175, 0.0188, 0.0045],
-                                  eigvec=[[-0.5675, 0.7192, 0.4009],
-                                          [-0.5808, -0.0045, -0.8140],
-                                          [-0.5836, -0.6948, 0.4203]])
+                            eigval=[0.2175, 0.0188, 0.0045],
+                            eigvec=[[-0.5675, 0.7192, 0.4009],
+                                    [-0.5808, -0.0045, -0.8140],
+                                    [-0.5836, -0.6948, 0.4203]])
 
         train_dataset = datasets.ImageFolder(
             traindir,
@@ -218,7 +218,6 @@ def main():
     model = model.cuda()
     print(model)
     print('the number of model parameters: {}'.format(sum([p.data.nelement() for p in model.parameters()])))
-
 
     if args.sample_method == 'effective_num':
         # calculate effective number of samples for longtail dataset sampler
@@ -408,7 +407,7 @@ def resizemix(images, lam):
     res_len = np.sqrt(1. - lam)
     cut_w = np.int(W * res_len)
     cut_h = np.int(H * res_len)
-
+    res_len = np.int(W * res_len)
     # uniform
     cx = np.random.randint(W)
     cy = np.random.randint(H)
