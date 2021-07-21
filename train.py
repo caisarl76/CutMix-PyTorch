@@ -16,7 +16,7 @@ import torchvision.models as models
 
 import warnings
 
-import utils
+from utils.utils import *
 from utils import resnet as RN, pyramidnet as PYRM
 from utils.losses import *
 from dataset.imbalance_cifar import IMBALANCECIFAR100, IMBALANCECIFAR10
@@ -167,9 +167,9 @@ def main():
         normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                          std=[0.229, 0.224, 0.225])
 
-        jittering = utils.ColorJitter(brightness=0.4, contrast=0.4,
+        jittering = ColorJitter(brightness=0.4, contrast=0.4,
                                       saturation=0.4)
-        lighting = utils.Lighting(alphastd=0.1,
+        lighting = Lighting(alphastd=0.1,
                                   eigval=[0.2175, 0.0188, 0.0045],
                                   eigvec=[[-0.5675, 0.7192, 0.4009],
                                           [-0.5808, -0.0045, -0.8140],
