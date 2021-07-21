@@ -90,7 +90,7 @@ def main():
         print(args.expname)
     else:
         args.expname = os.path.join('runs', expname)
-    return
+    # return
     if not os.path.exists(args.expname):
         os.makedirs(args.expname)
 
