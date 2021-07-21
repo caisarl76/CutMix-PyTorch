@@ -87,7 +87,6 @@ def main():
 
     if args.resize_mix:
         args.expname = os.path.join('runs', 'resize_mix', expname)
-        print(args.expname)
     else:
         args.expname = os.path.join('runs', expname)
     # return
@@ -308,7 +307,7 @@ def train(train_loader, model, criterion, optimizer, epoch, weights=None):
         target = target.cuda()
 
         r = np.random.rand(1)
-        if args.resizemix:
+        if args.resize_mix:
             lam = np.random.beta(args.beta, args.beta)
             rand_index = torch.randperm(input.size()[0]).cuda()
 
