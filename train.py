@@ -302,33 +302,45 @@ def train(train_loader, model, criterion, optimizer, epoch, weights=None):
         target = target.cuda()
 
         r = np.random.rand(1)
-        if args.beta > 0 and r < args.cutmix_prob:
-
-            # generate mixed sample
+        if args.resizemix:
             lam = np.random.beta(args.beta, args.beta)
             rand_index = torch.randperm(input.size()[0]).cuda()
 
-            if not args.sample_method == 'random':
-                from numpy.random import choice
-                # generate mixed samples with effective num.
-                prob_dist = [weights[i - 1] for i in target]
-                prob_dist = prob_dist / np.sum(prob_dist)
-                batch_size = input.size()[0]
-                rand_index = choice(np.array(range(batch_size)), batch_size, p=prob_dist)
-
             target_a = target
             target_b = target[rand_index]
-            bbx1, bby1, bbx2, bby2 = rand_bbox(input.size(), lam)
-            input[:, :, bbx1:bbx2, bby1:bby2] = input[rand_index, :, bbx1:bbx2, bby1:bby2]
-            # adjust lambda to exactly match pixel ratio
+            resized, bbx1, bby1, bbx2, bby2 = resizemix(input, lam)
+            input[:, :, bbx1:bbx2, bby1:bby2] = resized[rand_index, :, :]
             lam = 1 - ((bbx2 - bbx1) * (bby2 - bby1) / (input.size()[-1] * input.size()[-2]))
             # compute output
             output = model(input)
             loss = criterion(output, target_a) * lam + criterion(output, target_b) * (1. - lam)
         else:
-            # compute output
-            output = model(input)
-            loss = criterion(output, target)
+            if args.beta > 0 and r < args.cutmix_prob:
+                # generate mixed sample
+                lam = np.random.beta(args.beta, args.beta)
+                rand_index = torch.randperm(input.size()[0]).cuda()
+
+                if not args.sample_method == 'random':
+                    from numpy.random import choice
+                    # generate mixed samples with effective num.
+                    prob_dist = [weights[i - 1] for i in target]
+                    prob_dist = prob_dist / np.sum(prob_dist)
+                    batch_size = input.size()[0]
+                    rand_index = choice(np.array(range(batch_size)), batch_size, p=prob_dist)
+
+                target_a = target
+                target_b = target[rand_index]
+                bbx1, bby1, bbx2, bby2 = rand_bbox(input.size(), lam)
+                input[:, :, bbx1:bbx2, bby1:bby2] = input[rand_index, :, bbx1:bbx2, bby1:bby2]
+                # adjust lambda to exactly match pixel ratio
+                lam = 1 - ((bbx2 - bbx1) * (bby2 - bby1) / (input.size()[-1] * input.size()[-2]))
+                # compute output
+                output = model(input)
+                loss = criterion(output, target_a) * lam + criterion(output, target_b) * (1. - lam)
+            else:
+                # compute output
+                output = model(input)
+                loss = criterion(output, target)
 
         # measure accuracy and record loss
         err1, err5 = accuracy(output.data, target, topk=(1, 5))
@@ -380,6 +392,30 @@ def rand_bbox(size, lam):
     bby2 = np.clip(cy + cut_h // 2, 0, H)
 
     return bbx1, bby1, bbx2, bby2
+
+
+def resizemix(images, lam):
+    import torch.nn.functional as F
+    size = images.size()
+    W = size[2]
+    H = size[3]
+
+    res_len = np.sqrt(1. - lam)
+    cut_w = np.int(W * res_len)
+    cut_h = np.int(H * res_len)
+
+    # uniform
+    cx = np.random.randint(W)
+    cy = np.random.randint(H)
+
+    bbx1 = np.clip(cx - cut_w // 2, 0, W)
+    bby1 = np.clip(cy - cut_h // 2, 0, H)
+    bbx2 = np.clip(cx + cut_w // 2, 0, W)
+    bby2 = np.clip(cy + cut_h // 2, 0, H)
+
+    resized = F.interpolate(images, size=res_len)
+
+    return resized, bbx1, bby1, bbx2, bby2
 
 
 def validate(val_loader, model, criterion, epoch):

@@ -63,6 +63,7 @@ def adjust_cutmix_prob(args, epoch):
         return None
     return cutmix_prob
 
+
 def get_learning_rate(optimizer):
     lr = []
     for param_group in optimizer.param_groups:
@@ -151,3 +152,27 @@ def rand_bbox(size, lam):
     bby2 = np.clip(cy + cut_h // 2, 0, H)
 
     return bbx1, bby1, bbx2, bby2
+
+
+def resizemix(images, size, lam):
+    import torch.nn.functional as F
+    W = size[2]
+    H = size[3]
+
+    res_len = np.sqrt(1. - lam)
+    cut_w = np.int(W * res_len)
+    cut_h = np.int(H * res_len)
+
+    # uniform
+    cx = np.random.randint(W)
+    cy = np.random.randint(H)
+
+    bbx1 = np.clip(cx - cut_w // 2, 0, W)
+    bby1 = np.clip(cy - cut_h // 2, 0, H)
+    bbx2 = np.clip(cx + cut_w // 2, 0, W)
+    bby2 = np.clip(cy + cut_h // 2, 0, H)
+
+    resized = F.interpolate(images, size=res_len)
+
+    return resized, bbx1, bby1, bbx2, bby2
+
