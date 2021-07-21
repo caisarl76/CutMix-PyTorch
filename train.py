@@ -412,10 +412,10 @@ def resizemix(images, lam):
     cx = np.random.randint(W)
     cy = np.random.randint(H)
 
-    bbx1 = np.clip(cx - cut_w // 2, 0, W)
-    bby1 = np.clip(cy - cut_h // 2, 0, H)
-    bbx2 = np.clip(cx + cut_w // 2, 0, W)
-    bby2 = np.clip(cy + cut_h // 2, 0, H)
+    bbx1 = np.clip(cx - (cut_w // 2), 0, W)
+    bby1 = np.clip(cy - (cut_h // 2), 0, H)
+    bbx2 = np.clip(cx + (cut_w // 2), 0, W)
+    bby2 = np.clip(cy + (cut_h // 2), 0, H)
 
     resized = F.interpolate(images, size=res_len)
 
