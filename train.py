@@ -85,7 +85,12 @@ def main():
         [args.dataset, args.imb_type, (str)(args.imb_factor), args.net_type, (str)(args.depth), args.sample_method,
          (str)(args.beta), (str)(args.cutmix_prob), args.loss_type, ('lr' + (str)(args.lr))])
 
-    args.expname = os.path.join('runs', expname)
+    if args.resize_mix:
+        args.expname = os.path.join('runs', 'resize_mix', expname)
+        print(args.expname)
+    else:
+        args.expname = os.path.join('runs', expname)
+    return
     if not os.path.exists(args.expname):
         os.makedirs(args.expname)
 
