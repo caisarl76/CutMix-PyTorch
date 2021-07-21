@@ -54,7 +54,7 @@ parser.add_argument('--print-freq', '-p', default=1, type=int,
                     metavar='N', help='print frequency (default: 10)')
 
 parser.add_argument('--data_root', default='./data', type=str, )
-parser.add_argument('--dataset', dest='dataset', default='imagenet', type=str,
+parser.add_argument('--dataset', dest='dataset', default='cifar100_lt', type=str,
                     help='dataset (options: cifar10, cifar100, cifar100_lt, and imagenet)')
 parser.add_argument('--imb_type', default="exp", type=str, help='imbalance type')
 parser.add_argument('--imb_factor', default=0.1, type=float, help='imbalance factor')
