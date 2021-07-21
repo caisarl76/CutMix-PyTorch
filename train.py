@@ -307,32 +307,34 @@ def train(train_loader, model, criterion, optimizer, epoch, weights=None):
 
         r = np.random.rand(1)
         if r < args.cutmix_prob:
-            if args.resize_mix:
-                lam = np.random.beta(args.beta, args.beta)
+            if not args.sample_method == 'random':
+                from numpy.random import choice
+                # generate mixed samples with effective num.
+                prob_dist = [weights[i - 1] for i in target]
+                prob_dist = prob_dist / np.sum(prob_dist)
+                batch_size = input.size()[0]
+                rand_index = choice(np.array(range(batch_size)), batch_size, p=prob_dist)
+            else:
                 rand_index = torch.randperm(input.size()[0]).cuda()
 
+            if args.resize_mix:
+                lam = np.random.beta(args.beta, args.beta)
                 target_a = target
                 target_b = target[rand_index]
                 resized, bbx1, bby1, bbx2, bby2 = resizemix(input, lam)
-                input[:, :, bbx1:bbx2, bby1:bby2] = resized[rand_index, :, :]
-                lam = 1 - ((bbx2 - bbx1) * (bby2 - bby1) / (input.size()[-1] * input.size()[-2]))
-                # compute output
-                output = model(input)
-                loss = criterion(output, target_a) * lam + criterion(output, target_b) * (1. - lam)
+                if bbx1*bbx2 ==0:
+                    output = model(input)
+                    loss = criterion(output, target)
+                else:
+                    input[:, :, bbx1:bbx2, bby1:bby2] = resized[rand_index, :, :]
+                    lam = 1 - ((bbx2 - bbx1) * (bby2 - bby1) / (input.size()[-1] * input.size()[-2]))
+                    # compute output
+                    output = model(input)
+                    loss = criterion(output, target_a) * lam + criterion(output, target_b) * (1. - lam)
             else:
                 if args.beta > 0:
                     # generate mixed sample
                     lam = np.random.beta(args.beta, args.beta)
-                    rand_index = torch.randperm(input.size()[0]).cuda()
-
-                    if not args.sample_method == 'random':
-                        from numpy.random import choice
-                        # generate mixed samples with effective num.
-                        prob_dist = [weights[i - 1] for i in target]
-                        prob_dist = prob_dist / np.sum(prob_dist)
-                        batch_size = input.size()[0]
-                        rand_index = choice(np.array(range(batch_size)), batch_size, p=prob_dist)
-
                     target_a = target
                     target_b = target[rand_index]
                     bbx1, bby1, bbx2, bby2 = rand_bbox(input.size(), lam)
