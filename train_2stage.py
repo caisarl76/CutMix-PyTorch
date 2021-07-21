@@ -56,7 +56,7 @@ parser.add_argument('--alpha', default=300, type=float,
 parser.add_argument('--expname', default='TEST', type=str, help='name of experiment')
 parser.add_argument('--beta', default=1.0, type=float, help='hyperparameter beta')
 parser.add_argument('--cutmix_prob', default=0.5, type=float, choices=[0.0, 0.3, 0.5, 0.7])
-parser.add_argument('--cutmix_sche', default=None, type=str, choices=['none', 'linear', 'periodic', 'cosine'])
+parser.add_argument('--cutmix_sche', default='none', type=str, choices=['none', 'linear', 'periodic', 'cosine'])
 
 parser.set_defaults(bottleneck=True)
 parser.set_defaults(verbose=True)
