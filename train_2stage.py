@@ -45,8 +45,8 @@ parser.add_argument('--dataset', dest='dataset', default='cifar100_lt', type=str
 parser.add_argument('--imb_type', default="exp", type=str, help='imbalance type')
 parser.add_argument('--imb_factor', default=0.1, type=float, help='imbalance factor')
 parser.add_argument('--sample_method', default='effective_num', type=str,
-                    choices=['random', 'effective_num', 'class_balanced'])
-parser.add_argument('--sampler', default="random", type=str,
+                    choices=['random', 'effective_num', 'class_balanced', 'square_root'])
+parser.add_argument('--sampler', default="class_balanced", type=str,
                     choices=['none', 'class_balanced', 'squareroot'])
 
 parser.add_argument('--no-verbose', dest='verbose', action='store_false',
@@ -130,6 +130,10 @@ def main():
         weights = weights / np.sum(weights) * 100
     elif args.sample_method == 'class_balanced':
         weights = np.ones(len(cls_num_list))
+        weights = weights / np.sum(weights) * 100
+    elif args.sample_method == 'square_root':
+        weights = np.array(cls_num_list)
+        weights = np.sqrt(weights)
         weights = weights / np.sum(weights) * 100
     else:
         weights = None
