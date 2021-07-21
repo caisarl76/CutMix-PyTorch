@@ -401,14 +401,17 @@ def rand_bbox(size, lam):
 def resizemix(images, lam):
     import torch.nn.functional as F
     size = images.size()
+
     W = size[2]
     H = size[3]
-    assert W == 0
+
+    if W * H == 0:
+        return images, 0, 0, 0, 0
+
     res_len = np.sqrt(1. - lam)
     cut_w = np.int(W * res_len)
     cut_h = np.int(H * res_len)
     res_len = np.int(W * res_len)
-    assert res_len == 0
 
     # uniform
     bbx1 = np.random.randint(W - res_len)
