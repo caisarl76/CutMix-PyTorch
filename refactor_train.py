@@ -86,7 +86,7 @@ def main():
          (str)(args.beta), (str)(args.cutmix_prob), args.loss_type, ('lr' + (str)(args.lr))])
 
     if args.resize_mix:
-        args.expname = os.path.join('runs', 'resize_mix', expname)
+        args.expname = os.path.join('runs', 'refactor', expname)
     else:
         args.expname = os.path.join('runs', expname)
     # return
