@@ -83,7 +83,7 @@ def main():
     args = parser.parse_args()
     expname = '_'.join(
         [args.dataset, args.imb_type, (str)(args.imb_factor), args.net_type, (str)(args.depth), args.sample_method,
-         (str)(args.beta), (str)(args.cutmix_prob), args.loss_type, ('lr' + (str)(args.lr))])
+         (str)(args.beta), (str)(args.cutmix_prob), args.loss_type, ('lr' + (str)(args.lr)), ('bs'+(str)(args.batch_size))])
 
     if args.resize_mix:
         args.expname = os.path.join('runs', 'refactor', expname)
@@ -216,7 +216,7 @@ def train(train_loader, model, criterion, optimizer, epoch, weights=None):
             target_a = target
             target_b = target[rand_index]
             resized, bbx1, bby1, bbx2, bby2 = resizemix(input, lam)
-            if bbx1*bbx2 ==0:
+            if bbx1*bbx2 == 0:
                 output = model(input)
                 loss = criterion(output, target)
             else:
