@@ -1,5 +1,3 @@
-# original code: https://github.com/dyhan0920/PyramidNet-PyTorch/blob/master/train.py
-
 import argparse
 import os
 import shutil
@@ -85,10 +83,7 @@ def main():
         [args.dataset, args.imb_type, (str)(args.imb_factor), args.net_type, (str)(args.depth), args.sample_method,
          (str)(args.beta), (str)(args.cutmix_prob), args.loss_type, ('lr' + (str)(args.lr)), ('bs'+(str)(args.batch_size))])
 
-    if args.resize_mix:
-        args.expname = os.path.join('runs', 'refactor', expname)
-    else:
-        args.expname = os.path.join('runs', expname)
+    args.expname = os.path.join('runs', 'refactor', expname)
     # return
     if not os.path.exists(args.expname):
         os.makedirs(args.expname)
@@ -115,10 +110,8 @@ def main():
 
     print("=> creating model '{}'".format(args.net_type))
 
-    model = RN.ResNet('cifar100_lt', 32, 100, args.bottleneck)  # for ResNet
+    model = RN.ResNet('cifar100_lt', 32, 100, True)  # for ResNet
 
-
-    # model = torch.nn.DataParallel(model).cuda()
     model = model.cuda()
     print(model)
     print('the number of model parameters: {}'.format(sum([p.data.nelement() for p in model.parameters()])))

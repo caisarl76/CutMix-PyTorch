@@ -1,5 +1,3 @@
-# original code: https://github.com/dyhan0920/PyramidNet-PyTorch/blob/master/train.py
-
 import argparse
 import os
 import shutil
@@ -83,7 +81,7 @@ def main():
     args = parser.parse_args()
     expname = '_'.join(
         [args.dataset, args.imb_type, (str)(args.imb_factor), args.net_type, (str)(args.depth), args.sample_method,
-         (str)(args.beta), (str)(args.cutmix_prob), args.loss_type, ('lr' + (str)(args.lr))])
+         (str)(args.beta), (str)(args.cutmix_prob), args.loss_type, ('lr' + (str)(args.lr)), (str)(args.batch_size)])
 
     if args.resize_mix:
         args.expname = os.path.join('runs', 'resize_mix', expname)
@@ -122,7 +120,7 @@ def main():
             numberofclass = 100
 
         elif args.dataset == 'cifar100_lt':
-
+            print('cifar100_lt loaded')
             train_dataset = IMBALANCECIFAR100(phase='train', imbalance_ratio=args.imb_factor, root=args.data_root,
                                               imb_type=args.imb_type)
 
